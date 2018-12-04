@@ -1,5 +1,6 @@
 # alertmanager-bot
 A bot to send alertmanager notifications to slack to reduce webhook configuration overhead. 
+Just setup the api_url in slack_config in alertmanager to your running instance with path: /webhook
 
 # Running
 
