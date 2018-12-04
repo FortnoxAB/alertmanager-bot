@@ -17,7 +17,7 @@ import (
 
 func main() {
 	config := &config.Config{}
-	multiconfig.MustLoad(&config)
+	multiconfig.MustLoad(config)
 
 	fnxlogrus.Init(config.Log, logrus.StandardLogger())
 
