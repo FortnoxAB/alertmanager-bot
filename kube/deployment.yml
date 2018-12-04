@@ -1,0 +1,64 @@
+---
+apiVersion: extensions/v1beta1 # for versions before 1.8.0 use apps/v1beta1
+kind: Deployment
+metadata:
+  name: alertmanager-bot
+  namespace: monitoring
+  labels:
+    app: alertmanager-bot
+    version: "{{.Version}}"
+    team: "{{.Team}}"
+spec:
+  replicas: {{ .Config "replicas" }}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: alertmanager-bot
+  template:
+    metadata:
+      labels:
+        app: alertmanager-bot
+        version: "{{.Version}}"
+        team: "{{.Team}}"
+    spec:
+      imagePullSecrets:
+      - name: fortnox-kube-pull-secret
+      containers:
+      - name: alertmanager-bot
+        image: "quay.io/fortnox/{{.ServiceName}}:{{.Version}}"
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 3
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 3
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 200m
+            memory: 100Mi
+          requests:
+            cpu: 200m
+            memory: 100Mi
+        ports:
+        - containerPort: 8080
+        env:
+          - name: CONFIG_LOG_FORMAT
+            value: "json"
+          - name: CONFIG_LOG_LEVEL
+            value: "error"
+          - name: CONFIG_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: alertmanager-bot
+                key: token
+
+

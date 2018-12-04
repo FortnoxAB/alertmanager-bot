@@ -1,0 +1,10 @@
+{
+	"serviceName": "alertmanager-bot",
+	"language": "go",
+	"environments": {
+		"default": {
+			"replicas": "1"
+		}
+	},
+	"team": "sudo"
+}

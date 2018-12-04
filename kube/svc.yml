@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager-bot
+  labels:
+    app: alertmanager-bot
+    collect-metrics: "true"
+spec:
+  ports:
+  - port: 8080
+    protocol: TCP
+    name: metrics
+  selector:
+    app: alertmanager-bot
+

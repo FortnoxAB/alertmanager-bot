@@ -1,0 +1,17 @@
+library 'whatsout'
+
+node('deploy-kubernetes'){
+	stage( 'Checkout'){
+		checkout scm
+	}
+	def gitTag = "${GIT_TAG}"
+	def credId = "${CLUSTER_CREDENTIALS}"
+	def cluster = "${CLUSTER}"
+	tag = gitTag.replaceFirst('v', '')
+	wrap([$class: 'KubectlBuildWrapper', serverUrl: cluster, credentialsId: credId ]) {
+		stage('backend') {
+			sh 'fnxctl deploy '+tag
+		}
+	}
+
+}
