@@ -51,6 +51,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 		IconEmoji   string             `json:"icon_emoji,omitempty"`
 		IconURL     string             `json:"icon_url,omitempty"`
 		LinkNames   bool               `json:"link_names,omitempty"`
+		Text        string             `json:"text,omitempty"`
 		Attachments []slack.Attachment `json:"attachments"`
 	}
 	msg := &WebhookMessage{}
@@ -63,7 +64,21 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 		msg.Channel = c.Param("channel")
 	}
 
-	channelID, timestamp, err := ws.Slack.PostMessage(msg.Channel, slack.MsgOptionUsername(msg.Username), slack.MsgOptionAttachments(msg.Attachments...))
+	msgoptions := []slack.MsgOption{}
+
+	if msg.Text != "" {
+		msgoptions = append(msgoptions, slack.MsgOptionText(msg.Text, true))
+	}
+
+	if msg.Username != "" {
+		msgoptions = append(msgoptions, slack.MsgOptionUsername(msg.Username))
+	}
+
+	if len(msg.Attachments) > 0 {
+		msgoptions = append(msgoptions, slack.MsgOptionAttachments(msg.Attachments...))
+	}
+
+	channelID, timestamp, err := ws.Slack.PostMessage(msg.Channel, msgoptions...)
 	if err != nil {
 		return errors.Wrapf(err, "Error sending to channel %s", msg.Channel)
 	}
