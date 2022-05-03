@@ -1,4 +1,4 @@
-node('go') {
+node('go1.17') {
 	def newTag = ''
 	def tag = ''
 	def gitTag = ''
