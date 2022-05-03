@@ -12,7 +12,7 @@ node('go1.17') {
 
 
 		stage('Fetch dependencies'){
-			sh('dep ensure -v -vendor-only')
+			sh('go mod download')
 		}
 		stage('Run test'){
 			sh('go test -v ./...')
