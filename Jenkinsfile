@@ -5,41 +5,37 @@ node('go1.17') {
 
 	try {
 		stage('Checkout'){
-			dir('/go/src/github.com/fortnoxab/alertmanager-bot'){
 				checkout scm
 				notifyBitbucket()
 				gitTag = sh(script: 'git tag -l --contains HEAD', returnStdout: true).trim()
-			}
 		}
 
-		dir('/go/src/github.com/fortnoxab/alertmanager-bot'){
 
-			stage('Fetch dependencies'){
-				sh('dep ensure -v -vendor-only')
+		stage('Fetch dependencies'){
+			sh('dep ensure -v -vendor-only')
+		}
+		stage('Run test'){
+			sh('go test -v ./...')
+		}
+
+		if(gitTag != ''){
+			tag = gitTag
+		}
+
+		if( tag != ''){
+			strippedTag = tag.replaceFirst('v', '')
+			stage('Build the application'){
+				echo "Building with docker tag ${strippedTag}"
+				sh('CGO_ENABLED=0 GOOS=linux go build')
 			}
-			stage('Run test'){
-				sh('go test -v ./...')
+
+			stage('Generate docker image'){
+				image = docker.build('fortnox/alertmanager-bot:'+strippedTag, '--pull .')
 			}
 
-			if(gitTag != ''){
-				tag = gitTag
-			}
-
-			if( tag != ''){
-				strippedTag = tag.replaceFirst('v', '')
-				stage('Build the application'){
-					echo "Building with docker tag ${strippedTag}"
-					sh('CGO_ENABLED=0 GOOS=linux go build')
-				}
-
-				stage('Generate docker image'){
-					image = docker.build('fortnox/alertmanager-bot:'+strippedTag, '--pull .')
-				}
-
-				stage('Push docker image'){
-					docker.withRegistry("https://quay.io", 'docker-registry') {
-						image.push()
-					}
+			stage('Push docker image'){
+				docker.withRegistry("https://quay.io", 'docker-registry') {
+					image.push()
 				}
 			}
 		}
