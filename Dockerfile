@@ -1,4 +1,4 @@
-FROM alpine:3.8
-RUN apk add --no-cache ca-certificates
+FROM gcr.io/distroless/static-debian11:nonroot
 COPY alertmanager-bot /
+USER nonroot
 ENTRYPOINT ["/alertmanager-bot"]
