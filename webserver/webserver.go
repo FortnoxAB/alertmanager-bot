@@ -1,29 +1,39 @@
 package webserver
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/fortnoxab/ginprometheus"
 	"github.com/gin-gonic/gin"
 	"github.com/jonaz/ginlogrus"
-	"github.com/nlopes/slack"
-	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/sirupsen/logrus"
+	"github.com/slack-go/slack"
 )
+
+var errorsSending = prometheus.NewCounter(prometheus.CounterOpts{
+	Name: "alertmanager_bot_errors",
+	Help: "Number of errors posting message to channels.",
+})
+
+func init() {
+	prometheus.MustRegister(errorsSending)
+}
 
 type webserver struct {
 	Slack      *slack.Client
 	Prometheus *ginprometheus.Prometheus
 }
 
-//New webserver
+// New webserver
 func New(s *slack.Client) *webserver {
 	return &webserver{
 		Slack: s,
 	}
 }
 
-//Init a webserver with Gin
+// Init a webserver with Gin
 func (ws *webserver) Init() *gin.Engine {
 
 	router := gin.New()
@@ -80,9 +90,9 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 
 	channelID, timestamp, err := ws.Slack.PostMessage(msg.Channel, msgoptions...)
 	if err != nil {
-		return errors.Wrapf(err, "Error sending to channel %s", msg.Channel)
+		return fmt.Errorf("error sending to channel %s: %w", msg.Channel, err)
 	}
-	logrus.Infof("Message successfully sent to channel %s at %s", channelID, timestamp)
+	logrus.Infof("message successfully sent to channel %s at %s", channelID, timestamp)
 	return nil
 }
 
@@ -95,6 +105,7 @@ func checkErr(f func(c *gin.Context) error) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		err := f(c)
 		if err != nil {
+			errorsSending.Inc()
 			logrus.Error(err)
 			c.JSON(400, gin.H{
 				"error": err.Error(),

@@ -1,4 +1,4 @@
-node('go1.17') {
+node('go1.20') {
 	container('run'){
 		def newTag = ''
 		def tag = ''
@@ -7,7 +7,6 @@ node('go1.17') {
 		try {
 			stage('Checkout'){
 					checkout scm
-					notifyBitbucket()
 					gitTag = sh(script: 'git tag -l --contains HEAD', returnStdout: true).trim()
 			}
 
@@ -41,15 +40,9 @@ node('go1.17') {
 				}
 			}
 
-			currentBuild.result = 'SUCCESS'
 		} catch(err) {
-			currentBuild.result = 'FAILED'
-			notifyBitbucket()
 			throw err
 		}
-
-		notifyBitbucket()
-
 	}
 }
 
