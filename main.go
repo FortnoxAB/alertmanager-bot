@@ -11,8 +11,8 @@ import (
 	"github.com/fortnoxab/ginprometheus"
 	"github.com/jonaz/gograce"
 	"github.com/koding/multiconfig"
-	"github.com/nlopes/slack"
 	"github.com/sirupsen/logrus"
+	"github.com/slack-go/slack"
 )
 
 func main() {
@@ -53,7 +53,11 @@ func rtmWorker(ctx context.Context, s *slack.Client) {
 		select {
 		case <-ctx.Done():
 			logrus.Info("stopping rtmWorker")
-			rtm.Disconnect()
+			err := rtm.Disconnect()
+			if err != nil {
+				logrus.Error(err)
+			}
+
 			return
 		case msg := <-rtm.IncomingEvents:
 			processEvent(rtm, msg)
