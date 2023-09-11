@@ -92,6 +92,10 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 	if err != nil {
 		return fmt.Errorf("error sending to channel %s: %w", msg.Channel, err)
 	}
+	_, err = c.Writer.WriteString("ok")
+	if err != nil {
+		return err
+	}
 	logrus.Infof("message successfully sent to channel %s at %s", channelID, timestamp)
 	return nil
 }
