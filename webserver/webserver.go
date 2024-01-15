@@ -1,6 +1,7 @@
 package webserver
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -90,7 +91,8 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 
 	channelID, timestamp, err := ws.Slack.PostMessage(msg.Channel, msgoptions...)
 	if err != nil {
-		return fmt.Errorf("error sending to channel %s: %w", msg.Channel, err)
+		msgJSON, _ := json.Marshal(msg)
+		return fmt.Errorf("error sending to channel %s with message %s: %w", msg.Channel, string(msgJSON), err)
 	}
 	_, err = c.Writer.WriteString("ok")
 	if err != nil {
