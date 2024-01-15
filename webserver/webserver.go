@@ -91,8 +91,12 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 
 	channelID, timestamp, err := ws.Slack.PostMessage(msg.Channel, msgoptions...)
 	if err != nil {
-		msgJSON, _ := json.Marshal(msg)
-		return fmt.Errorf("error sending to channel %s with message %s: %w", msg.Channel, string(msgJSON), err)
+		if logrus.GetLevel() == logrus.DebugLevel {
+			msgJSON, _ := json.Marshal(msg)
+			return fmt.Errorf("error sending to channel %s with message %s: %w", msg.Channel, string(msgJSON), err)
+		} else {
+			return fmt.Errorf("error sending to channel %s: %w", msg.Channel, err)
+		}
 	}
 	_, err = c.Writer.WriteString("ok")
 	if err != nil {
