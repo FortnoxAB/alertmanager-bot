@@ -78,7 +78,14 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 	msgoptions := []slack.MsgOption{}
 
 	if msg.Text != "" {
-		msgoptions = append(msgoptions, slack.MsgOptionText(msg.Text, true))
+		maxCharacters := 500
+		textLength := len(msg.Text)
+
+		if textLength > maxCharacters {
+			msgoptions = append(msgoptions, slack.MsgOptionText(msg.Text[:maxCharacters]+fmt.Sprintf("...truncated to 500 chars. was %d", textLength), true))
+		} else {
+			msgoptions = append(msgoptions, slack.MsgOptionText(msg.Text, true))
+		}
 	}
 
 	if msg.Username != "" {
