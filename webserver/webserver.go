@@ -62,7 +62,6 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 		IconEmoji   string             `json:"icon_emoji,omitempty"`
 		IconURL     string             `json:"icon_url,omitempty"`
 		LinkNames   bool               `json:"link_names,omitempty"`
-		Text        string             `json:"text,omitempty"`
 		Attachments []slack.Attachment `json:"attachments"`
 	}
 	msg := &WebhookMessage{}
@@ -77,19 +76,17 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 
 	msgoptions := []slack.MsgOption{}
 
-	if msg.Text != "" {
-		maxCharacters := 500
-		textLength := len(msg.Text)
-
-		if textLength > maxCharacters {
-			msgoptions = append(msgoptions, slack.MsgOptionText(msg.Text[:maxCharacters]+fmt.Sprintf("...truncated to 500 chars. was %d", textLength), true))
-		} else {
-			msgoptions = append(msgoptions, slack.MsgOptionText(msg.Text, true))
-		}
-	}
-
 	if msg.Username != "" {
 		msgoptions = append(msgoptions, slack.MsgOptionUsername(msg.Username))
+	}
+
+	for _, attachment := range msg.Attachments {
+		maxCharacters := 500
+		textLength := len(attachment.Text)
+
+		if textLength > maxCharacters {
+			attachment.Text = attachment.Text[:maxCharacters] + fmt.Sprintf("...truncated to 500 chars. was %d", textLength)
+		}
 	}
 
 	if len(msg.Attachments) > 0 {
