@@ -80,8 +80,9 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 		msgoptions = append(msgoptions, slack.MsgOptionUsername(msg.Username))
 	}
 
-	for _, attachment := range msg.Attachments {
+	for i := range msg.Attachments {
 		maxCharacters := 500
+		attachment := &msg.Attachments[i]
 		textLength := len(attachment.Text)
 
 		if textLength > maxCharacters {
