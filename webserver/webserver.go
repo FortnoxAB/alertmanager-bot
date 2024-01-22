@@ -81,12 +81,12 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 	}
 
 	for i := range msg.Attachments {
-		maxCharacters := 500
+		maxCharacters := 1000
 		attachment := &msg.Attachments[i]
 		textLength := len(attachment.Text)
 
 		if textLength > maxCharacters {
-			attachment.Text = attachment.Text[:maxCharacters] + fmt.Sprintf("...truncated to 500 chars. was %d", textLength)
+			attachment.Text = attachment.Text[:maxCharacters] + fmt.Sprintf(" ...truncated to %d chars. was %d.", maxCharacters, textLength)
 		}
 	}
 
