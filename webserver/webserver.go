@@ -81,7 +81,7 @@ func (ws *webserver) handleWebhook(c *gin.Context) error {
 	}
 
 	for i := range msg.Attachments {
-		maxCharacters := 1000
+		maxCharacters := 4000
 		attachment := &msg.Attachments[i]
 		textLength := len(attachment.Text)
 
