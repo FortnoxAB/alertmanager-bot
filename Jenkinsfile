@@ -1,4 +1,4 @@
-node('go1.21') {
+node('go1.27') {
 	container('run'){
 		def newTag = ''
 		def tag = ''
